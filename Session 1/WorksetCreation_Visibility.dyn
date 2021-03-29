@@ -1,0 +1,258 @@
+{
+  "Uuid": "5b06c60f-60ba-4402-b863-ffb6426f7873",
+  "IsCustomNode": false,
+  "Description": null,
+  "Name": "WorksetCreation_Visibility",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "[\"Interior_FFE\", \"Life_Safety\", \"Interior_Hidden\"];",
+      "Id": "1c61f68b84204c8f94dd7773da14b41b",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "cc82c0e3b70d4ca997b9e8a6cedc5947",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport clr\r\n\r\nclr.AddReference('RevitAPI')\r\nfrom Autodesk.Revit import DB\r\nfrom Autodesk.Revit.DB.Structure import *\r\n\r\nclr.AddReference('RevitAPIUI')\r\nfrom Autodesk.Revit.UI import *\r\n\r\nclr.AddReference('System')\r\nfrom System.Collections.Generic import List\r\n\r\nclr.AddReference('RevitNodes')\r\nimport Revit\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.ImportExtensions(Revit.Elements)\r\n\r\nclr.AddReference('RevitServices')\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\n#uidoc=DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\r\n\r\n#Preparing input from dynamo to revit\r\n\r\ndef create_worksets(d, names):\r\n\tnew_Worksets = []\r\n\tfor name in names:\r\n\t\tws = DB.Workset.Create(d, name)\r\n\t\tnew_Worksets.append(ws)\r\n\treturn new_Worksets\r\n        \r\n#Do some action in a Transaction\r\n\r\nworkset_Names = IN[0]\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\nOUT = create_worksets(doc, workset_Names)\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n",
+      "VariableInputPorts": true,
+      "Id": "c21cb685768b4b40869333473648ac76",
+      "Inputs": [
+        {
+          "Id": "faa7e42f0dc842fc88269c2f16567ec2",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "18fa07e407e6444aa615a1cb6b645f94",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded IronPython script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "import clr\r\nclr.AddReference('RevitAPI')\r\nfrom Autodesk.Revit.DB import *\r\nfrom Autodesk.Revit import DB \r\n\r\nclr.AddReference(\"RevitNodes\")\r\nimport Revit\r\nclr.ImportExtensions(Revit.Elements)\r\n\r\nclr.AddReference(\"RevitServices\")\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\nworksets = IN[0]\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\nOutput = []\r\n\r\nfor workset in worksets:\r\n\tws = UnwrapElement(workset)\r\n\tsettings = WorksetDefaultVisibilitySettings.GetWorksetDefaultVisibilitySettings(doc)\r\n\tsettings.SetWorksetVisibility(DB.WorksetId(ws.Id), False)\r\n\tOutput.append(ws.Id)\r\nTransactionManager.Instance.TransactionTaskDone()\r\nOUT = Output\r\n",
+      "VariableInputPorts": true,
+      "Id": "6c7815fcb4834553be6a627548cf3ce7",
+      "Inputs": [
+        {
+          "Id": "f15c3b272dbd4e479c85826f36d99e58",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "aadbf9f074134b259daf780499d1bf8b",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded IronPython script."
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# Load the Python Standard and DesignScript Libraries\r\nimport clr\r\n\r\nclr.AddReference('RevitAPI')\r\nfrom Autodesk.Revit import DB\r\nfrom Autodesk.Revit.DB.Structure import *\r\n\r\nclr.AddReference('RevitAPIUI')\r\nfrom Autodesk.Revit.UI import *\r\n\r\nclr.AddReference('System')\r\nfrom System.Collections.Generic import List\r\n\r\nclr.AddReference('RevitNodes')\r\nimport Revit\r\nclr.ImportExtensions(Revit.GeometryConversion)\r\nclr.ImportExtensions(Revit.Elements)\r\n\r\nclr.AddReference('RevitServices')\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\n#uidoc=DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\r\n\r\n#Preparing input from dynamo to revit\r\n        \r\n#Do some action in a Transaction\r\n\r\nworksets = UnwrapElement(IN[0])\r\n\r\ndef set_workset_default_visiblity(d, workset, state):\r\n    wdvs = DB.WorksetDefaultVisibilitySettings.GetWorksetDefaultVisibilitySettings(d)\r\n    wdvs.SetWorksetVisibility(workset.Id, state)\r\n\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\nfor workset in worksets:\r\n\tif \"Hidden\" in workset.Name:\r\n\t\tset_workset_default_visiblity(doc, workset, False)\r\n\r\nOUT = 0\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n",
+      "VariableInputPorts": true,
+      "Id": "452f93296b8f4b20b44eff33df76228a",
+      "Inputs": [
+        {
+          "Id": "5af64b10bd484bbf9b391c80493af5dd",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "623ca46c479c481781c52322ff3ae17a",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded IronPython script."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "cc82c0e3b70d4ca997b9e8a6cedc5947",
+      "End": "faa7e42f0dc842fc88269c2f16567ec2",
+      "Id": "f1e1378639004142a98f9efbef04d505"
+    },
+    {
+      "Start": "18fa07e407e6444aa615a1cb6b645f94",
+      "End": "5af64b10bd484bbf9b391c80493af5dd",
+      "Id": "97dbf3afee324da291b8cd19cd38bd1e"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.6.1.8786",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Background Preview",
+      "EyeX": 8.8885182171980226,
+      "EyeY": 81.936215568327242,
+      "EyeZ": 42.370541658933135,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "NodeViews": [
+      {
+        "Id": "1c61f68b84204c8f94dd7773da14b41b",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Name": "Code Block",
+        "ShowGeometry": true,
+        "Excluded": false,
+        "X": 341.4600875255253,
+        "Y": 479.66353096886957
+      },
+      {
+        "Id": "c21cb685768b4b40869333473648ac76",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Name": "Python Script",
+        "ShowGeometry": true,
+        "Excluded": false,
+        "X": 931.92995611759193,
+        "Y": 473.40090431122394
+      },
+      {
+        "Id": "6c7815fcb4834553be6a627548cf3ce7",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Name": "Python Script",
+        "ShowGeometry": true,
+        "Excluded": false,
+        "X": 1688.6095800018361,
+        "Y": 502.839540681598
+      },
+      {
+        "Id": "452f93296b8f4b20b44eff33df76228a",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Name": "Python Script",
+        "ShowGeometry": true,
+        "Excluded": false,
+        "X": 1201.1434455709671,
+        "Y": 473.71252115285313
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "640b91a45ad44e828fbf86eb8eb44130",
+        "Title": "CREATE WORKSETS",
+        "Nodes": [
+          "c21cb685768b4b40869333473648ac76"
+        ],
+        "Left": 921.92995611759193,
+        "Top": 377.00090431122396,
+        "Width": 187.80333333333334,
+        "Height": 188.99999999999997,
+        "FontSize": 36.0,
+        "InitialTop": 473.40090431122394,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 86.4,
+        "Background": "#FFFFAA45"
+      },
+      {
+        "Id": "82204f9c4cf04418901d556d0a28a87e",
+        "Title": "WORKSET NAMES",
+        "Nodes": [
+          "1c61f68b84204c8f94dd7773da14b41b"
+        ],
+        "Left": 331.4600875255253,
+        "Top": 426.46353096886958,
+        "Width": 492.0,
+        "Height": 145.79999999999998,
+        "FontSize": 36.0,
+        "InitialTop": 479.66353096886957,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 43.2,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "01cffee6171e489ebe252eb91f54a620",
+        "Title": "SET VISIBILITY",
+        "Nodes": [
+          "452f93296b8f4b20b44eff33df76228a"
+        ],
+        "Left": 1191.1434455709671,
+        "Top": 377.31252115285315,
+        "Width": 166.85333333333335,
+        "Height": 188.99999999999997,
+        "FontSize": 36.0,
+        "InitialTop": 473.71252115285313,
+        "InitialHeight": 122.6,
+        "TextblockHeight": 86.4,
+        "Background": "#FFFFAA45"
+      }
+    ],
+    "X": -170.58664275787658,
+    "Y": -107.78028590790638,
+    "Zoom": 0.63950737094605115
+  }
+}
